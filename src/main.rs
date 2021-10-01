@@ -33,6 +33,7 @@ impl Hangman {
         initial.push(word.chars().last()?);
         Some(initial)
     }
+
     fn game_loop(&mut self) -> Option<bool> {
         match &self.status {
             HangmanStatus::Starting => {
@@ -65,6 +66,10 @@ impl Hangman {
                                     if self.guesses == 1 {
                                         println!("Time for your last guess!");
                                     }
+                                    if !self.current_word.contains("_") {
+                                        // no chars left to guess, word is found
+                                        self.status = HangmanStatus::Win;
+                                    }
                                 }
                                 false => {
                                     println!("I'm sorry, that doesn't appear in the word :(");
@@ -74,7 +79,7 @@ impl Hangman {
                         None => println!("Character not valid, try again"),
                     };
                 }
-                if (self.guesses == 0) {
+                if self.guesses == 0 {
                     self.status = HangmanStatus::Lose;
                 }
                 Some(true)
@@ -115,7 +120,6 @@ impl Hangman {
 fn main() -> Result<(), Error> {
     // todo already guessed chars?
     // todo multiple words (accept spaces?)
-    // todo win when all chars are guessed
     let mut hangman = Hangman::new("Xylophone", 10).unwrap();
     while hangman.game_loop().unwrap() {}
     Ok(())
