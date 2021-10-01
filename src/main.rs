@@ -26,11 +26,14 @@ impl Hangman {
     }
 
     fn initial_word(word: &str) -> Option<String> {
-        let length = word.len();
         let mut initial = String::new();
-        initial.push(word.chars().nth(0)?);
-        initial.push_str(&"_".repeat(length - 2));
-        initial.push(word.chars().last()?);
+        for (i, c) in word.chars().enumerate() {
+            if i == 0 || i == word.len()-1 || !c.is_alphabetic() {
+                initial.push(c);
+            } else {
+                initial.push('_');
+            }
+        }
         Some(initial)
     }
 
@@ -63,12 +66,11 @@ impl Hangman {
                             match guessed_correctly {
                                 true => {
                                     println!("Congrats, the word now is: {}", self.current_word);
-                                    if self.guesses == 1 {
-                                        println!("Time for your last guess!");
-                                    }
                                     if !self.current_word.contains("_") {
                                         // no chars left to guess, word is found
                                         self.status = HangmanStatus::Win;
+                                    } else if self.guesses == 1 {
+                                        println!("Time for your last guess!");
                                     }
                                 }
                                 false => {
@@ -119,7 +121,6 @@ impl Hangman {
 
 fn main() -> Result<(), Error> {
     // todo already guessed chars?
-    // todo multiple words (accept spaces?)
     let mut hangman = Hangman::new("Xylophone", 10).unwrap();
     while hangman.game_loop().unwrap() {}
     Ok(())
