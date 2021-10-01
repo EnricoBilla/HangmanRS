@@ -48,7 +48,6 @@ impl Hangman {
             }
 
             HangmanStatus::Playing => {
-                println!("{}", self.guessed_chars);
                 let mut input_line = String::new();
                 let len = std::io::stdin().read_line(&mut input_line).unwrap();
                 if len > 2 {
@@ -78,6 +77,9 @@ impl Hangman {
                                 }
                                 false => {
                                     println!("I'm sorry, that doesn't appear in the word :(");
+                                    if self.guesses == 1 {
+                                        println!("Time for your last guess!");
+                                    }
                                 }
                             }
                         }
