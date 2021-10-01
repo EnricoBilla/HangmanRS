@@ -13,6 +13,7 @@ struct Hangman {
     current_word: String,
     guesses: u8,
     status: HangmanStatus,
+    guessed_chars: String,
 }
 
 impl Hangman {
@@ -22,6 +23,7 @@ impl Hangman {
             current_word: Hangman::initial_word(&word)?,
             guesses: guesses,
             status: HangmanStatus::Starting,
+            guessed_chars: String::new(),
         })
     }
 
@@ -46,6 +48,7 @@ impl Hangman {
             }
 
             HangmanStatus::Playing => {
+                println!("{}", self.guessed_chars);
                 let mut input_line = String::new();
                 let len = std::io::stdin().read_line(&mut input_line).unwrap();
                 if len > 2 {
@@ -78,7 +81,7 @@ impl Hangman {
                                 }
                             }
                         }
-                        None => println!("Character not valid, try again"),
+                        None => println!("Character not valid or already guessed, try again"),
                     };
                 }
                 if self.guesses == 0 {
@@ -100,7 +103,11 @@ impl Hangman {
     }
 
     fn guess_char(&mut self, guessed: char) -> Option<bool> {
-        if (guessed >= 'a' && guessed <= 'z') || (guessed >= 'A' && guessed <= 'Z') {
+        if self.guessed_chars.contains(&guessed.to_string().to_lowercase()) {
+            // char already guessed
+            None
+        } else if guessed.is_alphabetic() {
+            // is a valid char
             let mut guessed_correctly = false;
             let mut new_word = String::new();
             for (i, c) in self.word.chars().enumerate() {
@@ -112,15 +119,18 @@ impl Hangman {
                 }
             }
             self.current_word = new_word;
+            if guessed_correctly {
+                self.guessed_chars.push_str(&*guessed.to_string().to_lowercase());
+            }
             Some(guessed_correctly)
         } else {
+            // not a valid char (eg a symbol)
             None
         }
     }
 }
 
 fn main() -> Result<(), Error> {
-    // todo already guessed chars?
     let mut hangman = Hangman::new("Xylophone", 10).unwrap();
     while hangman.game_loop().unwrap() {}
     Ok(())
